@@ -20,7 +20,7 @@ export default function SnakeInfoPage() {
 
       try {
         const encodedSpecies = encodeURIComponent(species.trim()); // ✅ ใช้ trim() เผื่อมีช่องว่างเกิน
-        const url = `http://localhost:8000/snake_info/${encodedSpecies}`;
+        const url = `https://backendsnake.onrender.com/snake_info/${encodedSpecies}`;
 
         console.log("📌 species:", species);
         console.log("🚀 Fetching from URL:", url);
