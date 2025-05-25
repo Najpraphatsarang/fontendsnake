@@ -15,7 +15,7 @@ export default function SnakeDetail() {
     if (species) {
       axios
         // .get(`http://localhost:5000/api/snakes/species/${species}`, { withCredentials: true })
-        .get(`https://backendsnake.onrender.com/api/snakes/species/${species}`, { withCredentials: true })
+        .get(`https://backendsnake.onrender.com/snakes/species/${species}`, { withCredentials: true })
         .then((response) => {
           setSnake(response.data);
           setIsLoading(false);
