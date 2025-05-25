@@ -19,7 +19,7 @@ export default function TitlebarBelowMasonryImageList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/snake", { withCredentials: true });
+        const response = await axios.get("https://backendsnake.onrender.com/snakes", { withCredentials: true });
         console.log("API Response:", response.data);
         if (response.data && response.data.snakes) {
           setSnakes(response.data.snakes);
