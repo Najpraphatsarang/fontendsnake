@@ -52,18 +52,18 @@ const Footer = () => {
                                       }
                                     />
                                 </ListItemButton>
-                                // <ListItemButton component='a' href='#'>
-                                //     <ListItemText
-                                //       primary={
-                                //         <Typography
-                                //           variant='body2'
-                                //           color={theme.palette.text.secondary}
-                                //         >
-                                //             Terms of Use
-                                //         </Typography>
-                                //       }
-                                //     />
-                                // </ListItemButton>
+                                <ListItemButton component='a' href='#'>
+                                    <ListItemText
+                                      primary={
+                                        <Typography
+                                          variant='body2'
+                                          color={theme.palette.text.secondary}
+                                        >
+                                            Terms of Use
+                                        </Typography>
+                                      }
+                                    />
+                                </ListItemButton>
                             </List>
                         </Grid>
                     </Hidden>
