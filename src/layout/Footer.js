@@ -94,15 +94,15 @@ const Footer = () => {
                                      color={theme.palette.text.secondary}
                                     >
                                         Photo by{' '}
-                                        <Link
-                                         href='https://unsplash.com/@joshwp'
-                                         alt='Naj Praphatsarang'
-                                         target='_blank'
-                                         rel='noreferrer'
-                                         color={theme.palette.text.secondary}
-                                        >
-                                            Naj Praphatsarang
-                                        </Link>{' '}
+                                        // <Link
+                                        //  href='https://unsplash.com/@joshwp'
+                                        //  alt='Naj Praphatsarang'
+                                        //  target='_blank'
+                                        //  rel='noreferrer'
+                                        //  color={theme.palette.text.secondary}
+                                        // >
+                                        //     Naj Praphatsarang
+                                        // </Link>{' '}
                                         on{' '}
                                     </Typography>
                                  }
