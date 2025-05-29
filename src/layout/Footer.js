@@ -102,8 +102,7 @@ const Footer = () => {
                                          color={theme.palette.text.secondary}
                                         >
                                             Naj Praphatsarang
-                                        </Link>{' '}
-                                        on{' '}
+                                        </Link>
                                     </Typography>
                                  }
                                 />
