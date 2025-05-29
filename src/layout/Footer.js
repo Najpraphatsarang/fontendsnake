@@ -95,7 +95,7 @@ const Footer = () => {
                                     >
                                         Photo by{' '}
                                         <Link
-                                         href='https://unsplash.com/@joshwp'
+                                         // href='https://unsplash.com/@joshwp'
                                          alt='Naj Praphatsarang'
                                          target='_blank'
                                          rel='noreferrer'
