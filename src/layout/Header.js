@@ -39,7 +39,7 @@ const Header = ({ onSidebarMobileOpen }) => {
     if (value.trim() !== '') {
       try {
         const res = await fetch(
-          `http://localhost:8000/searchsnake?search=${encodeURIComponent(value.trim())}`
+          `https://backendsnake.onrender.com/searchsnake?search=${encodeURIComponent(value.trim())}`
         );
         const data = await res.json();
         setSearchResults(data.snakes?.length > 0 ? data.snakes : []);

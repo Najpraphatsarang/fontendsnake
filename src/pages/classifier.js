@@ -60,7 +60,7 @@ const ImageClassifierPage = () => {
     formData.append('file', files[0], files[0].name);
 
     axios
-      .post('http://localhost:8000/predict', formData, {
+      .post('https://backendsnake.onrender.com/predict', formData, {
         headers: {
           accept: 'application/json',
           'content-type': 'multipart/form-data',
