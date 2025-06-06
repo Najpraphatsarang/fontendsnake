@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import Box from "@mui/material/Box";
-import ImageList from "@mui/material/ImageList";
-import ImageListItem from "@mui/material/ImageListItem";
-import ImageListItemBar from "@mui/material/ImageListItemBar";
-import Typography from "@mui/material/Typography";
-import LinearProgress from "@mui/material/LinearProgress";
+import {
+  Box,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
+  Typography,
+  LinearProgress,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -16,13 +20,16 @@ export default function TitlebarBelowMasonryImageList() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("https://backendsnake.onrender.com/snakes", {
           withCredentials: true,
         });
-        console.log("API Response test:", response.data);
         if (response.data && response.data.snakes) {
           setSnakes(response.data.snakes);
         } else {
@@ -47,16 +54,17 @@ export default function TitlebarBelowMasonryImageList() {
 
   const handleClick = (snake) => {
     const species = encodeURIComponent(snake.binomial);
-    console.log("Navigating to:", `/snake_info/${species}`);
     router.push(`/snake_info/${species}`);
   };
 
-  const getStatusLabel = (status) => {
-    return status === "identified" ? "พร้อมจำแนก" : "เร็วๆ นี้";
-  };
+  const getStatusLabel = (status) => (status === "identified" ? "พร้อมจำแนก" : "เร็วๆ นี้");
+  const getStatusColor = (status) => (status === "identified" ? "success.main" : "text.disabled");
 
-  const getStatusColor = (status) => {
-    return status === "identified" ? "success.main" : "text.disabled";
+  // ตั้งค่าจำนวนคอลัมน์ตามขนาดหน้าจอ
+  const getCols = () => {
+    if (isMobile) return 1;
+    if (isTablet) return 2;
+    return 3; // desktop
   };
 
   return (
@@ -90,7 +98,7 @@ export default function TitlebarBelowMasonryImageList() {
           {error}
         </Typography>
       ) : (
-        <ImageList variant="masonry" cols={3} gap={8}>
+        <ImageList variant="masonry" cols={getCols()} gap={8}>
           {snakes.map((snake, index) => (
             <ImageListItem
               key={snake._id || index}
@@ -175,6 +183,3 @@ export default function TitlebarBelowMasonryImageList() {
     </Box>
   );
 }
-
-
-//ทดสอบ
