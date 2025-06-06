@@ -67,7 +67,7 @@ const Footer = () => {
                             </List>
                         </Grid>
                     </Hidden>
-                    <Grid container item xs={12} md={4} justifyContent='center'>
+                    {/* <Grid container item xs={12} md={4} justifyContent='center'>
                         <List>
                             <ListItemButton>
                                 <ListItemText
@@ -83,7 +83,7 @@ const Footer = () => {
                                 />
                             </ListItemButton>
                         </List>
-                    </Grid>
+                    </Grid> */}
                     <Grid container item xs={12} md={4} justifyContent='center'>
                         <List>
                             <ListItemButton>
@@ -95,7 +95,7 @@ const Footer = () => {
                                     >
                                         Photo by{' '}
                                         <Link
-                                         href='https://unsplash.com/@joshwp'
+                                        //  href='https://unsplash.com/@joshwp'
                                          alt='Naj Praphatsarang'
                                          target='_blank'
                                          rel='noreferrer'
@@ -103,16 +103,6 @@ const Footer = () => {
                                         >
                                             Naj Praphatsarang
                                         </Link>{' '}
-                                        on{' '}
-                                        <Link
-                                         href='https://unsplash.com/photos/FWoH2qhLb5I'
-                                         alt='Unsplash'
-                                         target='_blank'
-                                         rel='noreferrer'
-                                         color={theme.palette.text.secondary}
-                                        >
-                                            Unsplash
-                                        </Link>
                                         .
                                     </Typography>
                                  }

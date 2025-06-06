@@ -10,19 +10,37 @@ const ClassifierResult = ({
   classificationResult,
   snakeName,
   confidence,
-  poisonous,
+  is_venomous,
   databaseImage,
+  firstAid
 }) => {
+  const venomousBool = Boolean(is_venomous);
+  const displayConfidence =
+    typeof confidence === 'number' ? `${confidence.toFixed(2)}%` : confidence;
+  const venomStatus = venomousBool ? 'มีพิษ' : 'ไม่มีพิษ';
+
   return (
     <Grid item xs={12}>
-      <Card sx={{ borderRadius: 4, boxShadow: 5 }}>
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: 5,
+          backgroundColor: venomousBool ? '#ffebee' : '#e8f5e9',
+          border: `2px solid ${venomousBool ? '#f44336' : '#4caf50'}`,
+        }}
+      >
         <CardContent>
           <Box display="flex" flexDirection="column" alignItems="center">
-            <Typography variant="h4" align="center" gutterBottom fontWeight={600}>
+            <Typography
+              variant="h4"
+              align="center"
+              gutterBottom
+              fontWeight={600}
+              sx={{ color: venomousBool ? 'error.main' : 'success.main' }}
+            >
               🐍 ผลการทำนาย
             </Typography>
 
-            {/* เปรียบเทียบรูปภาพ */}
             {selectedImage && databaseImage && (
               <>
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
@@ -36,7 +54,6 @@ const ClassifierResult = ({
                   gap={4}
                   sx={{ mb: 3 }}
                 >
-                  {/* รูปที่ผู้ใช้อัปโหลด */}
                   <Box textAlign="center">
                     <Box
                       component="img"
@@ -54,8 +71,6 @@ const ClassifierResult = ({
                       รูปภาพที่อัปโหลด
                     </Typography>
                   </Box>
-
-                  {/* รูปจากฐานข้อมูล */}
                   <Box textAlign="center">
                     <Box
                       component="img"
@@ -77,7 +92,6 @@ const ClassifierResult = ({
               </>
             )}
 
-            {/* กรณีมีแค่รูปเดียว */}
             {!databaseImage && selectedImage && (
               <>
                 <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
@@ -101,7 +115,6 @@ const ClassifierResult = ({
 
             <Divider sx={{ width: '100%', mb: 2 }} />
 
-            {/* รายละเอียดผลการทำนาย */}
             <Typography variant="h6" align="center" gutterBottom>
               <strong>ชื่อทางวิทยาศาสตร์:</strong> {classificationResult}
             </Typography>
@@ -109,19 +122,35 @@ const ClassifierResult = ({
               <strong>ชื่อภาษาไทย:</strong> {snakeName}
             </Typography>
             <Typography variant="h6" align="center" gutterBottom>
-              <strong>ความมั่นใจ:</strong> {confidence}%
+              <strong>ความมั่นใจ:</strong> {displayConfidence}
             </Typography>
             <Typography
               variant="h6"
               align="center"
               gutterBottom
               sx={{
-                color: poisonous === 'พิษ' ? 'error.main' : 'success.main',
+                color: venomousBool ? 'error.main' : 'success.main',
                 fontWeight: 'bold',
               }}
             >
-              <strong>พิษ:</strong> {poisonous}
+              <strong>พิษ:</strong> {venomStatus} {venomousBool ? '⚠️' : '✅'}
             </Typography>
+
+            {Array.isArray(firstAid) && firstAid.length > 0 && (
+              <>
+                <Divider sx={{ width: '100%', my: 2 }} />
+                <Typography variant="h6" align="center" gutterBottom fontWeight={600}>
+                  🩺 วิธีปฐมพยาบาลเบื้องต้น
+                </Typography>
+                <Box component="ul" sx={{ textAlign: 'left', maxWidth: 500, px: 2 }}>
+                  {firstAid.map((item, idx) => (
+                    <li key={idx}>
+                      <Typography variant="body1">{item}</Typography>
+                    </li>
+                  ))}
+                </Box>
+              </>
+            )}
           </Box>
         </CardContent>
       </Card>

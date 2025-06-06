@@ -218,16 +218,20 @@ const ImageClassifierPage = () => {
   <>
     {console.log("🎯 Backend response:", image)}
     <ClassifierResult
-      selectedImage={imagePreview} // รูปที่ user อัปโหลดขึ้น
+      selectedImage={imagePreview}
       classificationResult={capitalizeFirstLetter(replaceUnderscore(image.predictedClass))}
       snakeName={image.snakeInfo.thai_name}
-      confidence={(image.confidence * 100).toFixed(2)}
-      poisonous={image.snakeInfo.poisonous === "1" ? "พิษ" : "ไม่พิษ"}
+      confidence={(image.confidence)}
       databaseImage={image.snakeInfo.imageUrl}
+      is_venomous={image.snakeInfo.is_venomous} // ✅ boolean แล้ว
+      firstAid={image.snakeInfo.first_aid}
     />
     <ClassifyAgain submitOnClick={classifyAnother} />
   </>
 )}
+
+
+
 
 
             <Grid item xs={12}>

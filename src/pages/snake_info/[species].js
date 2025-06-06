@@ -19,7 +19,7 @@ export default function SnakeInfoPage() {
       setError(null);
 
       try {
-        const encodedSpecies = encodeURIComponent(species.trim()); // ✅ ใช้ trim() เผื่อมีช่องว่างเกิน
+        const encodedSpecies = encodeURIComponent(species.trim());
         const url = `https://backendsnake.onrender.com/snake_info/${encodedSpecies}`;
 
         console.log("📌 species:", species);
@@ -67,7 +67,7 @@ export default function SnakeInfoPage() {
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Container maxWidth="md" sx={{ flexGrow: 1, marginTop: "120px", paddingBottom: "100px" }}>
         <Typography variant="h4" gutterBottom align="center">
-          {snake?.binomial || "ไม่พบชื่อ"}
+          {snake?.thai_name|| "ไม่พบชื่อ"}
         </Typography>
 
         <Box display="flex" justifyContent="center" sx={{ mb: 4 }}>
@@ -109,6 +109,37 @@ export default function SnakeInfoPage() {
           <Typography mt={2}>
             <strong>รายละเอียด:</strong> {snake?.description || "ไม่มีข้อมูล"}
           </Typography>
+
+          {/* เพิ่มส่วน first_aid */}
+          {Array.isArray(snake?.first_aid) && (
+            <Box
+              mt={5}
+              p={3}
+              sx={{
+                backgroundColor: "#f9f9f9",
+                borderRadius: "10px",
+                boxShadow: 2,
+                border: "1px solid #c8e6c9",
+              }}
+            >
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ color: "#2e7d32", fontWeight: "bold", mb: 2 }}
+              >
+                🩺 แนวทางปฐมพยาบาลเบื้องต้น
+              </Typography>
+              <ol style={{ paddingLeft: "20px", margin: 0 }}>
+                {snake.first_aid.map((item, index) => (
+                  <li key={index} style={{ marginBottom: "10px" }}>
+                    <Typography variant="body1" sx={{ color: "#333" }}>
+                      {item}
+                    </Typography>
+                  </li>
+                ))}
+              </ol>
+            </Box>
+          )}
         </Box>
 
         <Divider sx={{ marginTop: 4 }} />
@@ -121,7 +152,9 @@ export default function SnakeInfoPage() {
 
         <Box sx={{ marginTop: "50px", textAlign: "center" }}>
           <Link to="footer" smooth={true} duration={500}>
-            <Typography color="primary" variant="body1">Scroll to Footer</Typography>
+            <Typography color="primary" variant="body1">
+              Scroll to Footer
+            </Typography>
           </Link>
         </Box>
       </Container>
@@ -137,11 +170,6 @@ export default function SnakeInfoPage() {
           marginTop: "auto",
         }}
       >
-        <Box sx={{ marginTop: "50px", textAlign: "center" }}>
-  <Link to="footer" smooth={true} duration={500}>
-    <Typography color="primary" variant="body1">Scroll to Footer</Typography>
-  </Link>
-</Box>
         <Typography variant="body2">© 2023 SnakeInfo</Typography>
       </footer>
     </Box>
