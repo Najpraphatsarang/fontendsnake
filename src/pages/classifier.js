@@ -1,11 +1,14 @@
 import { useState, useRef } from 'react';
 import axios from 'axios';
 import Head from 'next/head';
-import {
-  Box, Button, Card, CardContent, Container,
-  Grid, LinearProgress
-} from '@mui/material';
-import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import LinearProgress from '@mui/material/LinearProgress';
+import { useTheme, ThemeProvider, createTheme } from '@mui/material';
 
 import ImageDropzone from '../components/ImageDropzone.js';
 import ClassifierButtons from '../components/ClassifierButtons.js';
@@ -23,8 +26,7 @@ const ImageClassifierPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [cameraActive, setCameraActive] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
-
+  const [imagePreview, setImagePreview] = useState(null); // For image preview
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -32,78 +34,81 @@ const ImageClassifierPage = () => {
   const handleDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
     setFiles([file]);
-    setImagePreview(URL.createObjectURL(file));
+    setImagePreview(URL.createObjectURL(file)); // Preview image
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
+    const selectedFiles = event.target.files;
+    if (selectedFiles.length > 0) {
+      const file = selectedFiles[0];
       setFiles([file]);
-      setImagePreview(URL.createObjectURL(file));
+      setImagePreview(URL.createObjectURL(file)); // Preview image
     }
   };
 
   const classifyAnother = () => {
     setImage(null);
     setFiles([]);
-    setImagePreview(null);
+    setImagePreview(null); // Reset preview
   };
 
-  const sendData = async () => {
-    if (files.length === 0) return;
+  const sendData = () => {
+    setFiles([]);
     setIsLoading(true);
 
     const formData = new FormData();
     formData.append('file', files[0], files[0].name);
 
-    try {
-      const response = await axios.post(
-        'https://backendsnake.onrender.com/predict',
-        formData,
-        {
-          headers: {
-            accept: 'application/json',
-            'content-type': 'multipart/form-data',
-          },
+    axios
+      .post('https://backendsnake.onrender.com/predict', formData, {
+        headers: {
+          accept: 'application/json',
+          'content-type': 'multipart/form-data',
+        },
+      })
+      .then((response) => {
+        console.log('Response from API:', response.data);
+        if (response.data && response.data.predicted_class && response.data.confidence) {
+          setImage({
+            predictedClass: response.data.predicted_class,
+            confidence: response.data.confidence,
+            snakeInfo: response.data.snake_info,
+            uploaded_image: response.data.uploaded_image
+          });
         }
-      );
-
-      const data = response.data;
-      if (data?.predicted_class && data?.confidence) {
-        setImage({
-          predictedClass: data.predicted_class,
-          confidence: data.confidence,
-          snakeInfo: data.snake_info,
-          uploaded_image: data.uploaded_image,
-        });
-      }
-    } catch (error) {
-      console.error('❌ API Error:', error);
-    } finally {
-      setIsLoading(false);
-      setFiles([]);
-    }
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsLoading(false);
+      });
   };
 
   const handleRemove = () => {
     setFiles([]);
-    setImagePreview(null);
+    setImagePreview(null); // Reset preview
   };
 
   const startCamera = async () => {
     setCameraActive(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: 'environment' } },
+        video: {
+          facingMode: { exact: 'environment' }
+        }
       });
-      if (videoRef.current) videoRef.current.srcObject = stream;
-    } catch (err) {
-      console.warn('📷 Fallback to default camera');
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.warn('Trying default camera as fallback.');
       try {
         const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) videoRef.current.srcObject = fallbackStream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+        }
       } catch (fallbackError) {
-        console.error('❌ Camera error:', fallbackError);
+        console.error('Camera access failed:', fallbackError);
       }
     }
   };
@@ -115,7 +120,7 @@ const ImageClassifierPage = () => {
       canvasRef.current.toBlob((blob) => {
         const file = new File([blob], 'captured_image.png', { type: 'image/png' });
         setFiles([file]);
-        setImagePreview(URL.createObjectURL(file));
+        setImagePreview(URL.createObjectURL(file)); // Preview captured image
         setCameraActive(false);
       });
     }
@@ -124,77 +129,83 @@ const ImageClassifierPage = () => {
   return (
     <ThemeProvider theme={theme}>
       <Head>
-        <title>Image Classifier | Snake Identifier</title>
+        <title>Image Classifier | Image Classification</title>
       </Head>
-      <Box bgcolor={theme.palette.background.default} minHeight="100%" py={15}>
-        <Container maxWidth="lg">
+      <Box
+        backgroundColor={theme.palette.background.default}
+        minHeight='100%'
+        paddingTop={15}
+        paddingBottom={15}
+      >
+        <Container maxWidth={false}>
           <Grid container spacing={3}>
-            {/* Header + Progress Bar */}
-            <Grid item xs={12}>
+            <Grid item container alignItems='center' justifyContent='space-between' marginTop='-30px' spacing={3} xs={12}>
               <ClassifierHeader />
-              {isLoading && (
-                <Box my={2}>
-                  <LinearProgress color="success" />
-                </Box>
-              )}
+              <Grid item xs={12}>
+                {isLoading && (
+                  <Box marginBottom={3} marginTop={2}>
+                    <LinearProgress color='success' />
+                  </Box>
+                )}
+              </Grid>
             </Grid>
 
-            {/* Upload Card */}
             {!image && (
               <Grid item xs={12}>
                 <Card>
                   <CardContent>
-                    <Box display="flex" flexDirection="column" alignItems="center">
-                      {/* Image Preview or Camera Feed */}
+                    <Box display='flex' flexDirection='column' alignItems='center'>
                       {!cameraActive ? (
                         imagePreview ? (
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            style={{ maxWidth: '100%', borderRadius: '8px' }}
-                          />
+                          <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', borderRadius: '8px' }} />
                         ) : (
-                          <ImageDropzone
-                            accept="image/jpeg,image/jpg,image/png,image/gif"
-                            onDrop={handleDrop}
-                          />
+                          <ImageDropzone accept='image/jpeg,image/jpg,image/png,image/gif' onDrop={handleDrop} />
                         )
                       ) : (
-                        <>
-                          <video ref={videoRef} autoPlay playsInline width="100%" />
-                          <canvas ref={canvasRef} width="640" height="480" style={{ display: 'none' }} />
-                        </>
+                        <Box>
+                          <video ref={videoRef} autoPlay playsInline width='100%' />
+                          <canvas ref={canvasRef} width='640' height='480' style={{ display: 'none' }} />
+                        </Box>
                       )}
 
-                      {/* Action Buttons */}
-                      <Box display="flex" gap={2} mt={2}>
-                        <Button variant="contained" onClick={() => fileInputRef.current.click()}>
-                          เลือกรูปภาพ
+                      <Box display="flex" gap={2} marginTop={2}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => fileInputRef.current.click()}
+                        >
+                          เลือกรูปภาพจากอุปกรณ์
                         </Button>
                         {!cameraActive ? (
-                          <Button variant="contained" color="secondary" onClick={startCamera}>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={startCamera}
+                          >
                             เปิดกล้อง
                           </Button>
                         ) : (
-                          <Button variant="contained" color="success" onClick={captureImage}>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            onClick={captureImage}
+                          >
                             ถ่ายรูป
                           </Button>
                         )}
                       </Box>
 
-                      {/* Hidden Input */}
                       <input
                         type="file"
                         accept="image/*"
-                        hidden
+                        style={{ display: 'none' }}
                         ref={fileInputRef}
                         onChange={handleFileChange}
                       />
 
-                      {/* File Name */}
                       {files.length > 0 && !isLoading && (
-                        <Box mt={2}>
-                          โหลดรูป: <strong>{files[0].name}</strong>
+                        <Box marginTop={2} color={theme.palette.text.secondary}>
+                          Loaded image: <Button>{files[0].name}</Button>
                         </Box>
                       )}
                     </Box>
@@ -203,28 +214,31 @@ const ImageClassifierPage = () => {
               </Grid>
             )}
 
-            {/* Result */}
-            {image && (
-              <>
-                <ClassifierResult
-                  selectedImage={imagePreview}
-                  classificationResult={capitalizeFirstLetter(replaceUnderscore(image.predictedClass))}
-                  snakeName={image.snakeInfo?.thai_name}
-                  confidence={image.confidence}
-                  databaseImage={image.snakeInfo?.imageUrl}
-                  is_venomous={image.snakeInfo?.is_venomous}
-                  firstAid={image.snakeInfo?.first_aid}
-                />
-                <ClassifyAgain submitOnClick={classifyAnother} />
-              </>
-            )}
+{image && (
+  <>
+    {console.log("🎯 Backend response:", image)}
+    <ClassifierResult
+      selectedImage={imagePreview}
+      classificationResult={capitalizeFirstLetter(replaceUnderscore(image.predictedClass))}
+      snakeName={image.snakeInfo.thai_name}
+      confidence={(image.confidence)}
+      databaseImage={image.snakeInfo.imageUrl}
+      is_venomous={image.snakeInfo.is_venomous} // ✅ boolean แล้ว
+      firstAid={image.snakeInfo.first_aid}
+    />
+    <ClassifyAgain submitOnClick={classifyAnother} />
+  </>
+)}
 
-            {/* Classify / Reset Buttons */}
-            {files.length > 0 && !isLoading && (
-              <Grid item xs={12}>
+
+
+
+
+            <Grid item xs={12}>
+              {files.length > 0 && !isLoading && (
                 <ClassifierButtons submitOnClick={sendData} resetOnClick={handleRemove} />
-              </Grid>
-            )}
+              )}
+            </Grid>
           </Grid>
         </Container>
       </Box>
