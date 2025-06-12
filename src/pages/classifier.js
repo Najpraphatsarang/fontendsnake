@@ -19,36 +19,22 @@ import Spacer from '../components/Spacer.js';
 import replaceUnderscore from '../utils/replaceUnderscore.js';
 import capitalizeFirstLetter from '../utils/capitalizeFirstLetter.js';
 
+const theme = createTheme();
+
 const ImageClassifierPage = () => {
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [cameraActive, setCameraActive] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null); // For image preview
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // 🔁 Stop camera when component unmounts or camera is turned off
-  useEffect(() => {
-    return () => stopCamera();
-  }, []);
-
-  const stopCamera = () => {
-    const stream = videoRef.current?.srcObject;
-    if (stream) {
-      const tracks = stream.getTracks();
-      tracks.forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
-  };
-
   const handleDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
     setFiles([file]);
-    setImagePreview(URL.createObjectURL(file));
-    stopCamera(); // ปิดกล้องเมื่อเลือกรูป
-    setCameraActive(false);
+    setImagePreview(URL.createObjectURL(file)); // Preview image
   };
 
   const handleFileChange = (event) => {
@@ -56,22 +42,18 @@ const ImageClassifierPage = () => {
     if (selectedFiles.length > 0) {
       const file = selectedFiles[0];
       setFiles([file]);
-      setImagePreview(URL.createObjectURL(file));
-      stopCamera();
-      setCameraActive(false);
+      setImagePreview(URL.createObjectURL(file)); // Preview image
     }
   };
 
   const classifyAnother = () => {
     setImage(null);
     setFiles([]);
-    setImagePreview(null);
-    stopCamera();
+    setImagePreview(null); // Reset preview
   };
 
   const sendData = () => {
-    if (files.length === 0) return;
-
+    setFiles([]);
     setIsLoading(true);
 
     const formData = new FormData();
@@ -85,13 +67,13 @@ const ImageClassifierPage = () => {
         },
       })
       .then((response) => {
-        const { predicted_class, confidence, snake_info, uploaded_image } = response.data || {};
-        if (predicted_class && confidence && snake_info) {
+        console.log('Response from API:', response.data);
+        if (response.data && response.data.predicted_class && response.data.confidence) {
           setImage({
-            predictedClass: predicted_class,
-            confidence,
-            snakeInfo: snake_info,
-            uploaded_image,
+            predictedClass: response.data.predicted_class,
+            confidence: response.data.confidence,
+            snakeInfo: response.data.snake_info,
+            uploaded_image: response.data.uploaded_image
           });
         }
         setIsLoading(false);
@@ -104,29 +86,29 @@ const ImageClassifierPage = () => {
 
   const handleRemove = () => {
     setFiles([]);
-    setImagePreview(null);
-    stopCamera();
-    setCameraActive(false);
+    setImagePreview(null); // Reset preview
   };
 
   const startCamera = async () => {
     setCameraActive(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: 'environment' } },
+        video: {
+          facingMode: { exact: 'environment' }
+        }
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
     } catch (error) {
-      console.warn('Fallback to default camera.');
+      console.warn('Trying default camera as fallback.');
       try {
         const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
         if (videoRef.current) {
           videoRef.current.srcObject = fallbackStream;
         }
       } catch (fallbackError) {
-        console.error('Camera failed:', fallbackError);
+        console.error('Camera access failed:', fallbackError);
       }
     }
   };
@@ -138,8 +120,7 @@ const ImageClassifierPage = () => {
       canvasRef.current.toBlob((blob) => {
         const file = new File([blob], 'captured_image.png', { type: 'image/png' });
         setFiles([file]);
-        setImagePreview(URL.createObjectURL(file));
-        stopCamera();
+        setImagePreview(URL.createObjectURL(file)); // Preview captured image
         setCameraActive(false);
       });
     }
@@ -147,47 +128,68 @@ const ImageClassifierPage = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Head><title>Image Classifier | Snake</title></Head>
-      <Box backgroundColor={theme.palette.background.default} minHeight="100%" py={15}>
+      <Head>
+        <title>Image Classifier | Image Classification</title>
+      </Head>
+      <Box
+        backgroundColor={theme.palette.background.default}
+        minHeight='100%'
+        paddingTop={15}
+        paddingBottom={15}
+      >
         <Container maxWidth={false}>
           <Grid container spacing={3}>
-            <Grid item container alignItems="center" justifyContent="space-between" mt="-30px" spacing={3} xs={12}>
+            <Grid item container alignItems='center' justifyContent='space-between' marginTop='-30px' spacing={3} xs={12}>
               <ClassifierHeader />
-              {isLoading && (
-                <Grid item xs={12}>
-                  <Box my={2}><LinearProgress color="success" /></Box>
-                </Grid>
-              )}
+              <Grid item xs={12}>
+                {isLoading && (
+                  <Box marginBottom={3} marginTop={2}>
+                    <LinearProgress color='success' />
+                  </Box>
+                )}
+              </Grid>
             </Grid>
 
             {!image && (
               <Grid item xs={12}>
                 <Card>
                   <CardContent>
-                    <Box display="flex" flexDirection="column" alignItems="center">
+                    <Box display='flex' flexDirection='column' alignItems='center'>
                       {!cameraActive ? (
                         imagePreview ? (
                           <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', borderRadius: '8px' }} />
                         ) : (
-                          <ImageDropzone accept="image/*" onDrop={handleDrop} />
+                          <ImageDropzone accept='image/jpeg,image/jpg,image/png,image/gif' onDrop={handleDrop} />
                         )
                       ) : (
                         <Box>
-                          <video ref={videoRef} autoPlay playsInline width="100%" />
-                          <canvas ref={canvasRef} width="640" height="480" style={{ display: 'none' }} />
+                          <video ref={videoRef} autoPlay playsInline width='100%' />
+                          <canvas ref={canvasRef} width='640' height='480' style={{ display: 'none' }} />
                         </Box>
                       )}
 
-                      <Box display="flex" gap={2} mt={2}>
-                        <Button variant="contained" color="primary" onClick={() => fileInputRef.current.click()}>
+                      <Box display="flex" gap={2} marginTop={2}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => fileInputRef.current.click()}
+                        >
                           เลือกรูปภาพจากอุปกรณ์
                         </Button>
                         {!cameraActive ? (
-                          <Button variant="contained" color="secondary" onClick={startCamera}>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={startCamera}
+                          >
                             เปิดกล้อง
                           </Button>
                         ) : (
-                          <Button variant="contained" color="success" onClick={captureImage}>
+                          <Button
+                            variant="contained"
+                            color="success"
+                            onClick={captureImage}
+                          >
                             ถ่ายรูป
                           </Button>
                         )}
@@ -202,7 +204,7 @@ const ImageClassifierPage = () => {
                       />
 
                       {files.length > 0 && !isLoading && (
-                        <Box mt={2} color={theme.palette.text.secondary}>
+                        <Box marginTop={2} color={theme.palette.text.secondary}>
                           Loaded image: <Button>{files[0].name}</Button>
                         </Box>
                       )}
@@ -212,20 +214,25 @@ const ImageClassifierPage = () => {
               </Grid>
             )}
 
-            {image && (
-              <>
-                <ClassifierResult
-                  selectedImage={imagePreview}
-                  classificationResult={capitalizeFirstLetter(replaceUnderscore(image.predictedClass))}
-                  snakeName={image.snakeInfo?.thai_name || 'ไม่ทราบชื่อ'}
-                  confidence={image.confidence}
-                  databaseImage={image.snakeInfo?.imageUrl}
-                  is_venomous={image.snakeInfo?.is_venomous}
-                  firstAid={image.snakeInfo?.first_aid}
-                />
-                <ClassifyAgain submitOnClick={classifyAnother} />
-              </>
-            )}
+{image && (
+  <>
+    {console.log("🎯 Backend response:", image)}
+    <ClassifierResult
+      selectedImage={imagePreview}
+      classificationResult={capitalizeFirstLetter(replaceUnderscore(image.predictedClass))}
+      snakeName={image.snakeInfo.thai_name}
+      confidence={(image.confidence)}
+      databaseImage={image.snakeInfo.imageUrl}
+      is_venomous={image.snakeInfo.is_venomous} // ✅ boolean แล้ว
+      firstAid={image.snakeInfo.first_aid}
+    />
+    <ClassifyAgain submitOnClick={classifyAnother} />
+  </>
+)}
+
+
+
+
 
             <Grid item xs={12}>
               {files.length > 0 && !isLoading && (
@@ -235,7 +242,7 @@ const ImageClassifierPage = () => {
           </Grid>
         </Container>
       </Box>
-      <Spacer sx={{ pt: 6 }} />
+      <Spacer sx={{ paddingTop: 6 }} />
     </ThemeProvider>
   );
 };
